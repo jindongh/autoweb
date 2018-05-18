@@ -1,0 +1,21 @@
+{
+  "name": "autoweb",
+  "version": "1.0.0",
+  "description": "automate web operations",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "puppeteer",
+    "automate",
+    "web"
+  ],
+  "author": "jindongh",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.6.0",
+    "await": "^0.2.6",
+    "puppeteer": "^1.4.0"
+  }
+}
