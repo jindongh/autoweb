@@ -16,12 +16,12 @@ const config = require('./servicenow.json');
 		await iframe.type('#user_password', config.instancePassword);
 		await iframe.click('#sysverb_login');
 	}
-	console.log('stage 0: instance opened, stay for 30 seconds');
+	console.log('stage 0: instance opened, stay for 20 minutes');
 	await navigationPromise;
 	function sleep(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
-	await sleep(30 * 1000);
+	await sleep(20 * 60 * 1000);
 	console.log('stage 0: wakeup from sleep');
 	await page.screenshot({path: 'instance.png'});
 
@@ -48,9 +48,9 @@ const config = require('./servicenow.json');
 	await page.waitForSelector('#dp-hdr-userinfo-link');
 	await page.goto('https://developer.servicenow.com/app.do#!/instance');
 
-	async function refreshStatus() {
-		await page.waitForSelector('#refresh_status', {'visible': true});
-		await page.click('#refresh_status');
+	async function extendInstance() {
+		await page.waitForSelector('#dp-instance-extend-button', {'visible': true});
+		await page.click('#dp-instance-extend-button');
 	}
 	async function wakeup() {
 		await page.waitForSelector('#instanceWakeUpBtn', {'visible': true});
@@ -62,10 +62,17 @@ const config = require('./servicenow.json');
 		console.log('stage 3: wakeup');
 		await wakeup();
 	} catch (e) {
-		console.log('stage 3: failed to wakeup, try to refresh');
-		await refreshStatus();
 		console.log(e);
+		console.log('stage 3: failed to wakeup, try to refresh');
+		try {
+			await extendInstance();
+			console.log('stage 3: instance extended');
+		} catch(e) {
+			console.log(e);
+			console.log('stage 3: instance not extended');
+		}
 	}
+	console.log('stage 4: succeed.');
 
 	await page.screenshot({path: 'wakeup.png'});
 
