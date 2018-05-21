@@ -1,10 +1,30 @@
 const puppeteer = require('puppeteer');
-const user = require('./servicenow.json');
+const config = require('./servicenow.json');
 
 (async () => {
 	const browser = await puppeteer.launch();
-
 	const page = await browser.newPage();
+
+	console.log('stage 0: check instance');
+	await page.goto(config.instanceUrl);
+	await page.screenshot({path: 'home.png'});
+	navigationPromise = page.waitForNavigation();
+	for (let iframe of page.mainFrame().childFrames()) {
+		console.log('stage 0: try to find login button');
+		await iframe.waitForSelector('#user_name');
+		await iframe.type('#user_name', config.instanceUsername);
+		await iframe.type('#user_password', config.instancePassword);
+		await iframe.click('#sysverb_login');
+	}
+	console.log('stage 0: instance opened, stay for 30 seconds');
+	await navigationPromise;
+	function sleep(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+	await sleep(30 * 1000);
+	console.log('stage 0: wakeup from sleep');
+	await page.screenshot({path: 'instance.png'});
+
 	// open developer page, navigate to Login url
 	await page.goto('https://developer.servicenow.com/app.do#!/home');
 	var navigationPromise = page.waitForNavigation();
@@ -16,8 +36,8 @@ const user = require('./servicenow.json');
 
 	// enter username & password, click Login
 	console.log('stage 2: enter login page');
-	await page.type('#username', user.username);
-	await page.type('#password', user.password);
+	await page.type('#username', config.username);
+	await page.type('#password', config.password);
 	navigationPromise = page.waitForNavigation();
 	await page.click('#submitButton');
 	await navigationPromise;
@@ -39,16 +59,15 @@ const user = require('./servicenow.json');
 	// wake up
 	console.log('stage 3: enter instance page');
 	try {
-		console.log('stage 3: refresh status');
-		await refreshStatus();
-	} catch (e) {
-		console.log('stage 3: failed to refresh status, try to wake up');
-		console.log(e);
+		console.log('stage 3: wakeup');
 		await wakeup();
+	} catch (e) {
+		console.log('stage 3: failed to wakeup, try to refresh');
+		await refreshStatus();
+		console.log(e);
 	}
 
-	console.log(await page.content());
-	await page.screenshot({path: 'screenshot.png'});
+	await page.screenshot({path: 'wakeup.png'});
 
 	await browser.close();
 })();
