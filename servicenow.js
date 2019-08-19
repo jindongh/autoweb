@@ -36,7 +36,12 @@ const config = require('./servicenow.json');
 
 	// enter username & password, click Login
 	console.log('stage 2: enter login page');
+	console.log('stage 1.1 wait for username button');
+	await page.waitForSelector('#username', {'visible': true});
 	await page.type('#username', config.username);
+	await page.click('#usernameSubmitButton');
+	console.log('stage 1.2 wait for password button');
+	await page.waitForSelector('#password', {'visible': true});
 	await page.type('#password', config.password);
 	navigationPromise = page.waitForNavigation();
 	await page.click('#submitButton');
@@ -44,7 +49,7 @@ const config = require('./servicenow.json');
 	await page.waitForNavigation();
 
 	// dashboard -> instance page
-	console.log('stage 2: enter dashboard');
+	console.log('stage 3: enter dashboard');
 	await page.waitForSelector('#dp-hdr-userinfo-link');
 	await page.goto('https://developer.servicenow.com/app.do#!/instance');
 
